@@ -5,20 +5,21 @@ const express = require("express");
 const userAuth = require("./routes/index.routes");
 const connectDB = require("./config/db");
 const cors = require("cors");
-
+const path = require("path")
 const app = express();
 
 connectDB();
+
 app.use(cors());
 
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173", 
-//     credentials: true,
-//   })
-// );
-
 app.use(express.json());
+
+app.get('/', (req, res) => {
+  res.send('Your Learning APP API is up and running!');
+});
+
+// app.use("/uploads", express.static("uploads"));
+app.use('/public/', express.static(path.join(__dirname, '../uploads')));
 
 app.use("/api", userAuth);
 

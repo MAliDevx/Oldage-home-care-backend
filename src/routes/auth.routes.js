@@ -12,8 +12,8 @@ router.post("/verify-otp", verifyOTP);
 
 router.post(
   "/upload",
-  upload.single("file"), 
-  uploadProfilePic         
+  upload.array("file", 5), 
+  uploadProfilePic
 );
 
 

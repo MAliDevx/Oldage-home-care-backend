@@ -1,4 +1,4 @@
-const User = require("../models/user.model");
+const {User} = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generate-token");
 const generateOTP = require("../utils/generate-otp");
@@ -69,7 +69,7 @@ exports.loginUser = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+   const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({
         success: false,
