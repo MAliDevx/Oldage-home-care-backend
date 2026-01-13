@@ -26,10 +26,10 @@ const profileSchema = new mongoose.Schema(
     },
 
     /* ================= TEACHER FIELDS ================= */
-    isTeacher: {
-      type: Boolean,
-      default: false
-    },
+    // isTeacher: {
+    //   type: Boolean,
+    //   default: false
+    // },
 
     totalCourses: {
       type: Number,

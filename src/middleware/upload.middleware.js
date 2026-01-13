@@ -10,7 +10,7 @@ const allowedDocumentType = [
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(process.cwd(), "uploads"));
+    cb(null, path.join(process.cwd(),"src", "uploads"));
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
