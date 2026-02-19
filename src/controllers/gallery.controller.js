@@ -141,7 +141,12 @@ exports.updateGalleryItem = async (req, res) => {
     if (req.file) {
       // Delete old image from Cloudinary
       if (galleryItem.imagePublicId) {
-        await cloudinary.uploader.destroy(galleryItem.imagePublicId);
+        const resp = await cloudinary.uploader.destroy(galleryItem.imagePublicId);
+        if (resp.error) {
+          console.error("Failed to delete old image from Cloudinary:", resp.error);
+        }
+        // console.log(resp);
+        
       }
 
       galleryItem.imageUrl = req.file.path;
