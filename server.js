@@ -3,7 +3,6 @@ dotenv.config();
 
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 
 const connectDB = require("./src/config/db");
 const routes = require("./src/routes/index.routes");
@@ -18,11 +17,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from uploads folder
-app.use(
-  "/uploads",
-  express.static(path.resolve("src", "uploads"))
-);
+// Note: On Vercel, do NOT rely on local disk for uploads.
+// Images are stored in Cloudinary and served via their CDN URLs.
 
 // Routes
 app.get("/", (req, res) => {

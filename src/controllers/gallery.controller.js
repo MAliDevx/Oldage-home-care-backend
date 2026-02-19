@@ -1,6 +1,5 @@
 const Gallery = require("../models/gallery.model");
-const path = require("path");
-const fs = require("fs");
+const cloudinary = require("../config/cloudinary");
 
 /* ================= CREATE GALLERY ITEM ================= */
 exports.createGalleryItem = async (req, res) => {
@@ -28,12 +27,17 @@ exports.createGalleryItem = async (req, res) => {
       });
     }
 
-    const imagePath = `/uploads/${req.file.filename}`;
+    // With multer-storage-cloudinary:
+    // - req.file.path is the hosted URL (usually secure_url)
+    // - req.file.filename is the Cloudinary public_id
+    const imageUrl = req.file.path;
+    const imagePublicId = req.file.filename;
 
     const galleryItem = await Gallery.create({
       name,
       description: description || "",
-      image: imagePath,
+      imageUrl,
+      imagePublicId,
       category
     });
 
@@ -44,12 +48,9 @@ exports.createGalleryItem = async (req, res) => {
     });
 
   } catch (error) {
-    // Delete uploaded file if database operation fails
-    if (req.file) {
-      const filePath = path.join(process.cwd(), "src", "uploads", req.file.filename);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+    // If DB fails after upload, try to clean up Cloudinary asset
+    if (req.file?.filename) {
+      try { await cloudinary.uploader.destroy(req.file.filename); } catch (_) {}
     }
 
     res.status(500).json({
@@ -138,12 +139,13 @@ exports.updateGalleryItem = async (req, res) => {
 
     // Handle image update if new file is uploaded
     if (req.file) {
-      // Delete old image file
-      const oldImagePath = path.join(process.cwd(), "src", galleryItem.image);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
+      // Delete old image from Cloudinary
+      if (galleryItem.imagePublicId) {
+        await cloudinary.uploader.destroy(galleryItem.imagePublicId);
       }
-      galleryItem.image = `/uploads/${req.file.filename}`;
+
+      galleryItem.imageUrl = req.file.path;
+      galleryItem.imagePublicId = req.file.filename;
     }
 
     await galleryItem.save();
@@ -155,12 +157,9 @@ exports.updateGalleryItem = async (req, res) => {
     });
 
   } catch (error) {
-    // Delete uploaded file if database operation fails
-    if (req.file) {
-      const filePath = path.join(process.cwd(), "src", "uploads", req.file.filename);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+    // If DB fails after new upload, try to clean up the newly uploaded Cloudinary asset
+    if (req.file?.filename) {
+      try { await cloudinary.uploader.destroy(req.file.filename); } catch (_) {}
     }
 
     res.status(500).json({
@@ -185,10 +184,9 @@ exports.deleteGalleryItem = async (req, res) => {
       });
     }
 
-    // Delete image file
-    const imagePath = path.join(process.cwd(), "src", galleryItem.image);
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
+    // Delete image from Cloudinary
+    if (galleryItem.imagePublicId) {
+      await cloudinary.uploader.destroy(galleryItem.imagePublicId);
     }
 
     await Gallery.findByIdAndDelete(id);

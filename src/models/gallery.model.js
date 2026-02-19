@@ -10,7 +10,11 @@ const gallerySchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  image: {
+  imageUrl: {
+    type: String,
+    required: true
+  },
+  imagePublicId: {
     type: String,
     required: true
   },

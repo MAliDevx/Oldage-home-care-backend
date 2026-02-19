@@ -1,5 +1,6 @@
 const multer = require("multer");
-const path = require("path"); 
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
 
 const allowedDocumentType = [
   "image/jpeg",
@@ -8,13 +9,16 @@ const allowedDocumentType = [
   "image/svg+xml",
 ];
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(process.cwd(),"src", "uploads"));
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    return {
+      folder: "old-age-home",
+      resource_type: "image",
+      format: undefined, // keep original if possible
+      public_id: `${Date.now()}-${file.originalname.replace(/\s+/g, "-")}`
+    };
+  }
 });
 
 const fileFilter = (req, file, cb) => {
